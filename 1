@@ -1,5 +1,5 @@
-https://vk.com/doc284169981_658592672?hash=f3YZuir3U8SjXAbwmMRlmazBkCeMgd54Sl6j2RTDJqs&dl=1BF24w3UNdO56e7P7x4N0tcnaVjE8ZKnPBOafYSXcSchttps://vk.com/doc231173086_657715515?hash=Fz6hWlz7B0NTkQ6l9KiPSJ55vb7EHCMVjuZYdDxHbHz&dl=dTCoURWRmnVK9SALOA4rA2vFB7Ebas1JT2zSNfZ1QS8
-https://vk.com/doc231173086_657715515?hash=aLzHp3f6DhYQGJcesxisUi1T1XZEPVyoYzGyX7OhZ9D&dl=UyPqzvw5K3XppkGo7wZnfPoVZWlRiVHbeUIFcZXojDc
+https://vk.com/doc284169981_658592672?hash=5kDePiBXwUVbtmpeHXJHFlDWkEoK2EAYYlalmFyx7rD&dl=mC048p8NWnZqx0HuFwmEO2KzJzFTTXx9NX1Tp2eswSz
+https://vk.com/doc231173086_657715515?hash=sXeCZEjZ8HXICXMN5sjnE2RxZsOTPlCSLXYZq4rmdd0&dl=92B7o3AsOOjS2VBx600a6Ah7KQZ1AsK5sx4PrUK1I9X
 %25 вар
 %пунтк 1
 clear 
@@ -8,7 +8,7 @@ close all
 mu=1;
 w=3;
 N=10000;
-X=random('nakagami',mu,w,N,1);
+X=random('nakagami',mu,w,1,N);
 %пункт 2.1
 X_min=min(X);
 X_max=max(X);
@@ -17,11 +17,15 @@ X_disp_ispr=(1/(N-1))*sum((X-X_sr).^2);%var(X)
 X_disp_ne_ispr=(1/N)*sum((X-X_sr).^2);%var(X,1) 
 sredn_otkl=sqrt(X_disp_ispr);
 %пункт 2.3
+teoretich_m = (gamma(mu+1/2)/gamma(mu))*(w/mu)^(1/2)
+teoretich_D = w*(1-(1/mu)*(gamma(mu+1/2)/gamma(mu))^2)
+m = zeros(1, 1000); % массив выборочных средних
+D = zeros(1, 1000); % массив исправленных дисперсий
 for size=[10, 20, 50, 100, 10000]
     for i=1:1000
-        X=random('nakagami',mu,w,N,1);
-        m(i)=mean(X);
-        D(i)=var(X);
+        X=random('nakagami',mu,w,1,size);
+        m(i) = sum(X)/size;
+        D(i) = sum((X-m(i)).^2)/size;
     end
     figure;
     plot(1:1000,m);
@@ -31,19 +35,19 @@ for size=[10, 20, 50, 100, 10000]
     title({'Зависимость исправленной выборочной дисперсии','от номера реализации при size = ', num2str(size)})
 end
 %пункт 2.4
-sred_m = mean(m);
-sred_D = mean(D);
+sred_m = sum(m)/1000;
+sred_D = sum(D)/1000;
 %пункт 3
 r=floor(log2(N))+1;
 h=(X_max-X_min)/r;
 z=X_min:h:X_max;
 u=zeros(1,r);
-zi = zeros(1,r);
-for i=1:r
-    zi(i)=(z(i)+z(i+1))/2;
-end
+zi=zeros(1,r);
 for i=1:r
     u(i)=numel(X(X>=z(i)&X<z(i+1)));
+end
+for i=1:r
+    zi(i)=(z(i)+z(i+1))/2;
 end
 figure
 bar(zi,(u/(h*N)));
@@ -64,11 +68,11 @@ end
 grup_D=(1/N)*grup_D;
 %пункт 5
 func_pl_vero = @(x) (2*mu^mu.*x.^(2*mu-1).*exp((-mu/w).*x.^2))./gamma(mu)*(w^mu);
-func_raspred = @(x) integral(func_pl_vero, -Inf, Inf);
+func_raspred = @(x) cdf('nakagami',x,mu,w);%integral(func_pl_vero, -Inf, Inf);
 figure 
-stairs(zi, cumsum(u)/N); %накапливаемая сумма
+stairs(zi, cumsum(u)/N);%груп
 hold on
-stairs(sort(X), 1/N:1/N:1); %не груп
+stairs(sort(X), 1/N:1/N:1);%не груп
 hold on
 plot(sort(x), func_raspred(sort(x)));
 title({'Пункт 5'})
@@ -107,10 +111,10 @@ x_arr = rand(N, 1);
 viborka = obr_k_func_raspr(x_arr);
 nepr_m = sum(viborka)/N;
 nepr_D = sum((viborka-nepr_m).^2)/(N-1);
-func_for_m = @(x) x.*func_pl_ver(x);
-teor_nepr_m = @(x) integral(func_for_m, a, b);
-func_for_D = @(x) (x - teor_nepr_m).^2.*func_pl_ver(x);
-teor_nepr_D = @(x) integral(func_for_D, a, b);
+% func_for_m = @(x) x.*func_pl_ver(x);
+teor_nepr_m = @(x) integral(x.*func_pl_ver(x), a, b);
+% func_for_D = @(x) (x - teor_nepr_m).^2.*func_pl_ver(x);
+teor_nepr_D = @(x) integral((x - teor_nepr_m).^2.*func_pl_ver(x), a, b);
 c_max = max(viborka);
 c_min = min(viborka);
 r = floor(log2(N))+1;
