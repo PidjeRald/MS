@@ -1,5 +1,3 @@
-https://vk.com/doc284169981_658592672?hash=5kDePiBXwUVbtmpeHXJHFlDWkEoK2EAYYlalmFyx7rD&dl=mC048p8NWnZqx0HuFwmEO2KzJzFTTXx9NX1Tp2eswSz
-https://vk.com/doc231173086_657715515?hash=sXeCZEjZ8HXICXMN5sjnE2RxZsOTPlCSLXYZq4rmdd0&dl=92B7o3AsOOjS2VBx600a6Ah7KQZ1AsK5sx4PrUK1I9X
 %25 вар
 %пунтк 1
 clear 
@@ -17,8 +15,8 @@ X_disp_ispr=(1/(N-1))*sum((X-X_sr).^2);%var(X)
 X_disp_ne_ispr=(1/N)*sum((X-X_sr).^2);%var(X,1) 
 sredn_otkl=sqrt(X_disp_ispr);
 %пункт 2.3
-teoretich_m = (gamma(mu+1/2)/gamma(mu))*(w/mu)^(1/2)
-teoretich_D = w*(1-(1/mu)*(gamma(mu+1/2)/gamma(mu))^2)
+teoretich_m = (gamma(mu+1/2)/gamma(mu))*(w/mu)^(1/2);
+teoretich_D = w*(1-(1/mu)*(gamma(mu+1/2)/gamma(mu))^2);
 m = zeros(1, 1000); % массив выборочных средних
 D = zeros(1, 1000); % массив исправленных дисперсий
 for size=[10, 20, 50, 100, 10000]
@@ -111,10 +109,8 @@ x_arr = rand(N, 1);
 viborka = obr_k_func_raspr(x_arr);
 nepr_m = sum(viborka)/N;
 nepr_D = sum((viborka-nepr_m).^2)/(N-1);
-% func_for_m = @(x) x.*func_pl_ver(x);
-teor_nepr_m = @(x) integral(x.*func_pl_ver(x), a, b);
-% func_for_D = @(x) (x - teor_nepr_m).^2.*func_pl_ver(x);
-teor_nepr_D = @(x) integral((x - teor_nepr_m).^2.*func_pl_ver(x), a, b);
+teor_nepr_m = integral(@(x) x.*func_pl_ver(x), a, b);
+teor_nepr_D = integral(@(x) (x - teor_nepr_m).^2.*func_pl_ver(x), a, b);
 c_max = max(viborka);
 c_min = min(viborka);
 r = floor(log2(N))+1;
